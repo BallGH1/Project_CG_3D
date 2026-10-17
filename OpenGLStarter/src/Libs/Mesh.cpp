@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cstdint>
 #include <cstdlib>
+#include <cmath>
 #include <filesystem>
 
 // Lock the attribute locations we’ll use everywhere
@@ -141,6 +142,14 @@ namespace
         }
     };
 
+    // Blender writes Kd in linear colour space, but our shaders treat colours like
+    // texture pixels (sRGB, as shown on screen) -> convert, or everything looks too dark
+    inline float LinearToSRGB(float c)
+    {
+        c = std::fmax(0.0f, std::fmin(1.0f, c));
+        return (c <= 0.0031308f) ? c * 12.92f : 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
+    }
+
     // Read "newmtl name" + "Kd r g b" pairs from a .mtl file
     std::unordered_map<std::string, glm::vec3> LoadMTL(const std::filesystem::path& mtlPath)
     {
@@ -161,14 +170,15 @@ namespace
             else if (tag == "Kd" && !current.empty())
             {
                 glm::vec3 kd(1.0f); ss >> kd.r >> kd.g >> kd.b;
-                colours[current] = kd;
+                colours[current] = glm::vec3(LinearToSRGB(kd.r), LinearToSRGB(kd.g), LinearToSRGB(kd.b));
             }
         }
         return colours;
     }
 
     // ---- binary cache: <obj>.meshcache = magic, counts, raw vertex + index arrays ----
-    constexpr char CACHE_MAGIC[8] = { 'M','E','S','H','C','0','0','1' };
+    // Bump the version whenever the loader changes how vertices are built (old caches get rebuilt)
+    constexpr char CACHE_MAGIC[8] = { 'M','E','S','H','C','0','0','2' };
 
     std::filesystem::path CachePathFor(const std::filesystem::path& objPath)
     {
