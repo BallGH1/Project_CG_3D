@@ -1,0 +1,35 @@
+# CMake build output
+build/
+build-*/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+
+# Local CMake presets (machine-specific; do not commit)
+CMakeUserPresets.json
+
+# Visual Studio / MSVC
+.vs/
+*.vcxproj*
+*.sln
+
+# Compiled output
+*.exe
+*.dll
+*.lib
+*.pdb
+*.obj
+# ...but keep the 3D models (Wavefront .obj) used by the program
+!Models/*.obj
+# character.obj is 287 MB (GitHub limit is 100 MB per file), so it is shared
+# outside git: put the model at OpenGLStarter/Models/character.obj
+Models/character.obj
+*.o
+*.a
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Binary model cache written by Mesh::CreateMeshFromOBJ
+*.meshcache

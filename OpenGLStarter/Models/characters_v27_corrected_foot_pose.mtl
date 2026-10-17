@@ -1,0 +1,157 @@
+# Base colours for character.obj (Kd = diffuse colour, 0..1)
+# The original .mtl from Blender was missing, so these colours are guessed
+# from the material names. Replace this file with Blender's exported .mtl
+# to get the original colours.
+
+newmtl Trousers_umber
+Kd 0.39 0.29 0.18
+
+newmtl Jacket_olive
+Kd 0.36 0.38 0.20
+
+newmtl Patch_ochre
+Kd 0.70 0.50 0.18
+
+newmtl Young_skin_warm
+Kd 0.82 0.60 0.45
+
+newmtl Young_skin_warm.001
+Kd 0.82 0.60 0.45
+
+newmtl Natural_lip_warm
+Kd 0.72 0.42 0.38
+
+newmtl Young_skin_peach
+Kd 0.92 0.72 0.60
+
+newmtl Young_skin_peach.001
+Kd 0.92 0.72 0.60
+
+newmtl Natural_lip_peach
+Kd 0.80 0.50 0.47
+
+newmtl Eye_ivory
+Kd 0.94 0.92 0.86
+
+newmtl Iris_hazel
+Kd 0.50 0.36 0.18
+
+newmtl Black
+Kd 0.03 0.03 0.03
+
+newmtl Soft_eye_shade
+Kd 0.55 0.40 0.35
+
+newmtl Hair_espresso
+Kd 0.12 0.08 0.06
+
+newmtl Hair_chestnut
+Kd 0.35 0.20 0.10
+
+newmtl Eyewear_gunmetal
+Kd 0.25 0.26 0.28
+
+newmtl Shirt_rust
+Kd 0.62 0.28 0.14
+
+newmtl Jacket_seam
+Kd 0.28 0.30 0.16
+
+newmtl Thread
+Kd 0.60 0.56 0.48
+
+newmtl Cloth_tan
+Kd 0.70 0.58 0.42
+
+newmtl Cloth_teal
+Kd 0.12 0.45 0.45
+
+newmtl Teal_seam
+Kd 0.08 0.35 0.35
+
+newmtl White_shirt
+Kd 0.92 0.92 0.90
+
+newmtl Lapel_satin
+Kd 0.10 0.10 0.12
+
+newmtl Lapel_satin.002
+Kd 0.10 0.10 0.12
+
+newmtl Mechanism
+Kd 0.30 0.31 0.33
+
+newmtl Mechanism.002
+Kd 0.30 0.31 0.33
+
+newmtl Porcelain_shell
+Kd 0.93 0.93 0.95
+
+newmtl Silver_titanium
+Kd 0.72 0.73 0.76
+
+newmtl Reference_ivory_synthetic_ceramic
+Kd 0.92 0.89 0.82
+
+newmtl Reference_eye_white
+Kd 0.96 0.96 0.96
+
+newmtl Reference_steel_blue_iris
+Kd 0.28 0.45 0.65
+
+newmtl Reference_pupil_and_mouth
+Kd 0.04 0.04 0.05
+
+newmtl Reference_neck_carbon
+Kd 0.08 0.08 0.09
+
+newmtl Reference_polished_neck_titanium
+Kd 0.68 0.69 0.72
+
+newmtl Comic_grin_warm_enamel
+Kd 0.96 0.93 0.85
+
+newmtl Green_donation_banknote_paper
+Kd 0.62 0.75 0.58
+
+newmtl Green_banknote_printing
+Kd 0.22 0.42 0.25
+
+newmtl Rose_donation_banknote_paper
+Kd 0.90 0.68 0.72
+
+newmtl Rose_banknote_printing
+Kd 0.62 0.26 0.35
+
+newmtl Clear_thin_PET_plastic
+Kd 0.85 0.90 0.92
+
+newmtl Footwear_worn_brown_leather
+Kd 0.33 0.20 0.11
+
+newmtl Footwear_rubber_outsoles
+Kd 0.10 0.10 0.10
+
+newmtl Footwear_stitched_dark_welt
+Kd 0.16 0.11 0.08
+
+newmtl Footwear_lace_woven_beige
+Kd 0.78 0.70 0.56
+
+newmtl Footwear_black_polished_leather
+Kd 0.05 0.05 0.06
+
+newmtl Footwear_black_woven_lace
+Kd 0.06 0.06 0.06
+
+newmtl Robot_ankle_matte_carbon_coupling
+Kd 0.10 0.10 0.11
+
+newmtl Coat_graphite
+Kd 0.22 0.23 0.25
+
+newmtl Robot_charcoal_wool_trousers
+Kd 0.18 0.18 0.20
+
+newmtl Ai_ivory_embroidery
+Kd 0.90 0.87 0.78

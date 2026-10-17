@@ -1,0 +1,65 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows / Visual Studio 2026
+            os: windows-2025-vs2026
+            configure_preset: win-msvc-2026
+            build_preset: build-win-2026-debug
+          - name: macOS / Apple Silicon
+            os: macos-26
+            configure_preset: mac-arm64
+            build_preset: build-mac-arm64
+          - name: Linux / Ubuntu 24.04
+            os: ubuntu-24.04
+            configure_preset: linux-x64
+            build_preset: build-linux
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install current CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            ninja-build \
+            autoconf \
+            autoconf-archive \
+            automake \
+            libtool \
+            libxinerama-dev \
+            libxcursor-dev \
+            xorg-dev \
+            libglu1-mesa-dev
+
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: bc0581e1d9b075b09553b5770817c90d9f1b63fc
+
+      - name: Configure
+        run: cmake --preset "${{ matrix.configure_preset }}"
+
+      - name: Build
+        run: cmake --build --preset "${{ matrix.build_preset }}" --parallel
