@@ -21,9 +21,9 @@ CMakeUserPresets.json
 *.obj
 # ...but keep the 3D models (Wavefront .obj) used by the program
 !Models/*.obj
-# character.obj is 287 MB (GitHub limit is 100 MB per file), so it is shared
-# outside git: put the model at OpenGLStarter/Models/character.obj
+# Large character models exceed GitHub's 100 MB file limit; keep them locally.
 Models/character.obj
+Models/characters_v27_corrected_foot_pose.obj
 *.o
 *.a
 

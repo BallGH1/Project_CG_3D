@@ -119,13 +119,17 @@ void CreateShaders()
         shaderDirectory / "depthShader.frag"
     );
 }
-void CreateOBJ (const std::filesystem::path& modelPath) { 
-    Mesh *obj = new Mesh();
+void CreateOBJ(const std::filesystem::path& modelPath)
+{
+    Mesh* obj = new Mesh();
     bool loaded = obj->CreateMeshFromOBJ(modelPath.u8string().c_str());
-    if(!loaded) { 
-        std::cerr << "Failed to load model : " << modelPath <<std::endl;
-        return ;
+
+    if (!loaded)
+    {
+        std::cerr << "Failed to load model: " << modelPath << std::endl;
+        return;
     }
+
     meshList.push_back(obj);
 }
 
@@ -224,6 +228,7 @@ void RenderScene(glm::mat4 view , glm::mat4 projection) {
     //Render Character (2 seated beggars + robot)
     glUniform1i(Loc("useTexture"), 0); // use material colours, not a texture
     glUniform1i(Loc("worldUV"), 0);
+    glUniform3f(Loc("flatNormal"), 0.0f, 0.0f, 0.0f);
     glUniform3f(Loc("tintColour"), 1.0f, 1.0f, 1.0f);
     glUniform1f(Loc("specularStrength"), 0.3f);
 
@@ -235,82 +240,6 @@ void RenderScene(glm::mat4 view , glm::mat4 projection) {
     glUniformMatrix4fv(Loc("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     meshList[0]->RenderMesh();
-}
-
-// Draw cube.obj as a box from its centre and size.
-// texture = 0 -> plain colour (tint only); texScale = texture repeats per metre (x, y)
-// texOffset = world position where the image starts (uv = 0,0)
-void DrawBox(glm::vec3 centre, glm::vec3 size, GLuint texture, glm::vec3 tint,
-             glm::vec2 texScale = glm::vec2(1.0f), float specular = 0.05f,
-             glm::vec2 texOffset = glm::vec2(0.0f))
-{
-    glUniform1i(Loc("useTexture"), texture != 0);
-    glUniform1i(Loc("worldUV"), 1);
-    glUniform2fv(Loc("texScale"), 1, glm::value_ptr(texScale));
-    glUniform2fv(Loc("texOffset"), 1, glm::value_ptr(texOffset));
-    glUniform3fv(Loc("tintColour"), 1, glm::value_ptr(tint));
-    glUniform1f(Loc("specularStrength"), specular);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glm::mat4 model (1.0f);
-    model = glm::translate(model, centre);
-    model = glm::scale(model, size);
-    glUniformMatrix4fv(Loc("model"), 1, GL_FALSE, glm::value_ptr(model));
-
-    meshList[2]->RenderMesh();
-}
-
-// Roadside: brick wall, sidewalk, red-white curb, asphalt road with lane marks
-void RenderStreet()
-{
-    const glm::vec3 white(1.0f);
-
-    // Old wall photo behind the characters (goes a bit below the sidewalk).
-    // The photo covers the full wall height once; across, it keeps the photo's
-    // aspect ratio and repeats mirrored (GL_MIRRORED_REPEAT) so there is no seam.
-    float wallThick = 0.3f;
-    float wallTotalHeight = wallHeight + sidewalkHeight;
-    float wallImageWidth = wallTotalHeight * wallImageAspect; // metres per photo
-    DrawBox(glm::vec3(0.0f, (wallHeight - sidewalkHeight) / 2.0f, wallFrontZ - wallThick / 2.0f),
-            glm::vec3(streetLength, wallTotalHeight, wallThick),
-            texWall, white,
-            glm::vec2(1.0f / wallImageWidth, 1.0f / wallTotalHeight), 0.05f,
-            glm::vec2(-wallImageWidth / 2.0f, -sidewalkHeight)); // photo centred behind the characters
-
-    // Concrete coping on top of the wall
-    DrawBox(glm::vec3(0.0f, wallHeight + 0.05f, wallFrontZ - wallThick / 2.0f),
-            glm::vec3(streetLength, 0.1f, wallThick + 0.08f),
-            0, glm::vec3(0.70f, 0.70f, 0.68f));
-
-    // Sidewalk (top at y = 0)
-    float sidewalkDepth = curbZ - wallFrontZ;
-    DrawBox(glm::vec3(0.0f, -sidewalkHeight / 2.0f, wallFrontZ + sidewalkDepth / 2.0f),
-            glm::vec3(streetLength, sidewalkHeight, sidewalkDepth),
-            texSidewalk, white, glm::vec2(1.0f));
-
-    // Curb: 1 m blocks painted red / white (like Thai roadsides)
-    for (int i = 0; i < (int)streetLength; ++i)
-    {
-        float x = -streetLength / 2.0f + 0.5f + i;
-        glm::vec3 paint = (i % 2 == 0) ? glm::vec3(0.80f, 0.12f, 0.10f) : glm::vec3(0.92f, 0.92f, 0.90f);
-        DrawBox(glm::vec3(x, -sidewalkHeight / 2.0f, curbZ + curbWidth / 2.0f),
-                glm::vec3(1.0f, sidewalkHeight, curbWidth), 0, paint, glm::vec2(1.0f), 0.15f);
-    }
-
-    // Road (asphalt), its top is sidewalkHeight below the sidewalk
-    float roadStartZ = curbZ + curbWidth;
-    DrawBox(glm::vec3(0.0f, -sidewalkHeight - 0.05f, roadStartZ + roadWidth / 2.0f),
-            glm::vec3(streetLength, 0.1f, roadWidth),
-            texAsphalt, white, glm::vec2(0.5f));
-
-    // Dashed white centre line: 3 m dash, 3 m gap
-    for (float x = -streetLength / 2.0f + 1.5f; x < streetLength / 2.0f; x += 6.0f)
-    {
-        DrawBox(glm::vec3(x, -sidewalkHeight + 0.002f, roadStartZ + roadWidth / 2.0f),
-                glm::vec3(3.0f, 0.004f, 0.15f), 0, glm::vec3(0.95f, 0.95f, 0.92f));
-    }
 }
 
 void Cleanup()
@@ -353,16 +282,17 @@ int main()
     // CreateShaders();
 
 
-    //Load Object
-    CreateOBJ(modelDirectory / "character.obj");
+    // Keep the render slots fixed: character [0], light [1], street [2].
+    // Stop before rendering if any model fails to load.
+
+
+    CreateOBJ(modelDirectory / "characters_v27_corrected_foot_pose.obj");
+    //load light
+    CreateOBJ(modelDirectory / "cube.obj");
+    //load bg
+    CreateOBJ(modelDirectory / "cube.obj");
+
     CreateShaders();
-
-    
-    //Load Light
-    CreateOBJ(modelDirectory / "cube.obj");
-
-    //Load Box (used for the street: wall, sidewalk, curb, road)
-    CreateOBJ(modelDirectory / "cube.obj");
     
 
     GLuint texture_cloth = LoadTexture(textureDirectory / "uvmap.png");
@@ -586,8 +516,127 @@ int main()
         //Render Character
         RenderScene(view,projection) ;
 
-        //Render Street (wall, sidewalk, curb, road) - receives the shadows
-        RenderStreet();
+        // Background, like the lab: transform cube.obj, bind texture, then draw.
+        // The main shader adds textures and lighting to the lab's flat background.
+        {
+            shaderList[0]->UseShader();
+            uniformModel = shaderList[0]->GetUniformLocation("model");
+            uniformView = shaderList[0]->GetUniformLocation("view");
+            uniformProjection = shaderList[0]->GetUniformLocation("projection");
+            glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniform1i(shaderList[0]->GetUniformLocation("worldUV"), 1);
+            glUniform1f(shaderList[0]->GetUniformLocation("specularStrength"), 0.05f);
+            glActiveTexture(GL_TEXTURE0);
+
+            // A flattened cube has overlapping front/back faces: render only the front.
+            GLboolean wasCulling = glIsEnabled(GL_CULL_FACE);
+            GLint previousCullFace = GL_BACK;
+            glGetIntegerv(GL_CULL_FACE_MODE, &previousCullFace);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+
+            // Wall: flatten along Z and apply the wall photo.
+            float wallTotalHeight = wallHeight + sidewalkHeight;
+            float wallImageWidth = wallTotalHeight * wallImageAspect;
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, (wallHeight - sidewalkHeight) / 2.0f, wallFrontZ));
+            model = glm::scale(model, glm::vec3(streetLength, wallTotalHeight, 0.0f));
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+            // A zero scale cannot use inverse(model) for lighting normals.
+            glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 0.0f, 1.0f);
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 1);
+            glUniform3f(shaderList[0]->GetUniformLocation("tintColour"), 1.0f, 1.0f, 1.0f);
+            glUniform2f(shaderList[0]->GetUniformLocation("texScale"), 1.0f / wallImageWidth, 1.0f / wallTotalHeight);
+            glUniform2f(shaderList[0]->GetUniformLocation("texOffset"), -wallImageWidth / 2.0f, -sidewalkHeight);
+            glBindTexture(GL_TEXTURE_2D, texWall);
+            meshList[2]->RenderMesh();
+
+            // Concrete strip above the wall: another vertical flattened cube.
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, wallHeight + 0.05f, wallFrontZ + 0.04f));
+            model = glm::scale(model, glm::vec3(streetLength, 0.1f, 0.0f));
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 0);
+            glUniform3f(shaderList[0]->GetUniformLocation("tintColour"), 0.70f, 0.70f, 0.68f);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            meshList[2]->RenderMesh();
+
+            // Sidewalk: rotate the flat cube onto the ground and apply its texture.
+            float sidewalkDepth = curbZ - wallFrontZ;
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, wallFrontZ + sidewalkDepth / 2.0f));
+            model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(streetLength, sidewalkDepth, 0.0f));
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 1.0f, 0.0f);
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 1);
+            glUniform3f(shaderList[0]->GetUniformLocation("tintColour"), 1.0f, 1.0f, 1.0f);
+            glUniform2f(shaderList[0]->GetUniformLocation("texScale"), 1.0f, 1.0f);
+            glUniform2f(shaderList[0]->GetUniformLocation("texOffset"), 0.0f, 0.0f);
+            glBindTexture(GL_TEXTURE_2D, texSidewalk);
+            meshList[2]->RenderMesh();
+
+            // Red/white curb: one vertical face and one horizontal top per block.
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 0);
+            glUniform1f(shaderList[0]->GetUniformLocation("specularStrength"), 0.15f);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            for (int i = 0; i < (int)streetLength; ++i)
+            {
+                float x = -streetLength / 2.0f + 0.5f + i;
+                glm::vec3 paint = (i % 2 == 0) ? glm::vec3(0.80f, 0.12f, 0.10f) : glm::vec3(0.92f, 0.92f, 0.90f);
+                glUniform3fv(shaderList[0]->GetUniformLocation("tintColour"), 1, glm::value_ptr(paint));
+
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x, -sidewalkHeight / 2.0f, curbZ + curbWidth));
+                model = glm::scale(model, glm::vec3(1.0f, sidewalkHeight, 0.0f));
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+                glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 0.0f, 1.0f);
+                meshList[2]->RenderMesh();
+
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x, 0.0f, curbZ + curbWidth / 2.0f));
+                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(1.0f, curbWidth, 0.0f));
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+                glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 1.0f, 0.0f);
+                meshList[2]->RenderMesh();
+            }
+
+            // Road: horizontal flattened cube with asphalt texture.
+            float roadStartZ = curbZ + curbWidth;
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, -sidewalkHeight, roadStartZ + roadWidth / 2.0f));
+            model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(streetLength, roadWidth, 0.0f));
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+            glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 1.0f, 0.0f);
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 1);
+            glUniform1f(shaderList[0]->GetUniformLocation("specularStrength"), 0.05f);
+            glUniform3f(shaderList[0]->GetUniformLocation("tintColour"), 1.0f, 1.0f, 1.0f);
+            glUniform2f(shaderList[0]->GetUniformLocation("texScale"), 0.5f, 0.5f);
+            glUniform2f(shaderList[0]->GetUniformLocation("texOffset"), 0.0f, 0.0f);
+            glBindTexture(GL_TEXTURE_2D, texAsphalt);
+            meshList[2]->RenderMesh();
+
+            // Lane markings: white flattened cubes just above the road.
+            glUniform1i(shaderList[0]->GetUniformLocation("useTexture"), 0);
+            glUniform3f(shaderList[0]->GetUniformLocation("tintColour"), 0.95f, 0.95f, 0.92f);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            for (float x = -streetLength / 2.0f + 1.5f; x < streetLength / 2.0f; x += 6.0f)
+            {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x, -sidewalkHeight + 0.004f, roadStartZ + roadWidth / 2.0f));
+                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+                model = glm::scale(model, glm::vec3(3.0f, 0.15f, 0.0f));
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+                meshList[2]->RenderMesh();
+            }
+
+            glUniform3f(shaderList[0]->GetUniformLocation("flatNormal"), 0.0f, 0.0f, 0.0f);
+            glCullFace(previousCullFace);
+            if (!wasCulling) glDisable(GL_CULL_FACE);
+        }
 
         //light
         shaderList[1]->UseShader();
